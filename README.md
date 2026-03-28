@@ -1,118 +1,85 @@
-# 💬 Sentiment Analysis App (Amazon Reviews)
+💬 Sentiment Analysis App (Amazon Reviews)
 
-A Machine Learning web application built using **Streamlit** that analyzes customer reviews and predicts sentiment as **Positive, Negative, or Neutral**.
+A Machine Learning + Streamlit web application that analyzes customer reviews and classifies them into Positive 😊, Negative 😠, or Neutral 😐 sentiments.
 
----
+This project is enhanced with confidence-based prediction and GenAI-inspired features, making it more practical and closer to real-world AI systems.
 
-## 🚀 Live Demo
+🚀 Live Demo
 
-🔗 https://sentiment-analysis-app-ien2borjxkjws9jkrewz7p.streamlit.app/
+👉 https://sentiment-analysis-app-ien2borjxkjws9jkrewz7p.streamlit.app/
 
----
+📌 Features
+✅ Sentiment prediction using Logistic Regression and Naive Bayes
+✅ Displays model accuracy
+✅ NLP using TF-IDF Vectorization
+✅ Confidence-based neutral classification
+✅ Interactive UI built with Streamlit
+✅ Handles real-world ambiguous reviews
+🤖 GenAI-Inspired Features (No API Used)
+🧠 Explain sentiment reasoning
+✨ Improve user-written reviews
+📄 Summarize long reviews
+💌 Generate automated replies
+🧠 How It Works
+Loads Amazon review dataset from CSV files
+Cleans and preprocesses text data
+Converts text into numerical format using TF-IDF
+Trains two models:
+Logistic Regression
+Multinomial Naive Bayes
+Predicts sentiment for user input
+🔥 Confidence-Based Prediction Logic
 
-## 📌 Features
+The model calculates probability for each class:
 
-* Analyze real-time user input reviews
-* Predict sentiment using:
+If confidence ≥ 0.6 → Show predicted sentiment
+If confidence < 0.6 → Classify as Neutral
 
-  * Logistic Regression
-  * Naive Bayes
-* Displays model accuracy
-* Clean and interactive UI using Streamlit
-* Handles multiple CSV files as dataset input
-* Robust error handling for missing or invalid data
+👉 This helps handle uncertain or mixed reviews more effectively.
 
----
-
-## 🧠 Machine Learning Workflow
-
-1. Data Collection (Amazon Reviews Dataset)
-2. Data Preprocessing:
-
-   * Lowercasing text
-   * Removing null values
-3. Sentiment Mapping:
-
-   * Score ≥ 4 → Positive
-   * Score = 3 → Neutral
-   * Score ≤ 2 → Negative
-4. Feature Engineering:
-
-   * TF-IDF Vectorization (unigrams + bigrams)
-5. Model Training:
-
-   * Logistic Regression
-   * Multinomial Naive Bayes
-6. Evaluation:
-
-   * Accuracy Score
-
----
-
-## 🛠️ Tech Stack
-
-* Python 🐍
-* Streamlit 🌐
-* Pandas 📊
-* Scikit-learn 🤖
-
----
-
-## 📂 Project Structure
-
-```
+🛠 Tech Stack
+Python
+Streamlit
+Scikit-learn
+Pandas
+NLP (TF-IDF)
+📂 Project Structure
 sentiment-analysis-app/
 │
 ├── app.py
 ├── requirements.txt
-├── data/
-│   └── csv_parts/
-│       ├── part1.csv
-│       ├── part2.csv
-│       └── part3.csv
-```
+├── README.md
+└── data/
+    └── csv_parts/
+        ├── file1.csv
+        ├── file2.csv
+▶️ How to Run Locally
+git clone https://github.com/your-username/sentiment-analysis-app.git
+cd sentiment-analysis-app
+pip install -r requirements.txt
+streamlit run app.py
+📊 Sample Test Reviews
 
----
+Positive:
+"This product is amazing, I absolutely love it!"
 
-## ⚠️ Challenges Faced
+Negative:
+"Worst product ever, very disappointed."
 
-* Handling large CSV files on Streamlit Cloud
-* Fixing file path issues during deployment
-* Managing empty/corrupt CSV files
-* Optimizing model training for limited resources
+Neutral:
+"It is okay, not too good not too bad."
 
----
+🎯 Future Improvements
+Voice input support 🎤
+Multi-language sentiment analysis 🌐
+Data visualization dashboard 📊
+Integration with real GenAI APIs 🤖
+👩‍💻 Author
 
-## 💡 Learnings
+Vaishnavi Tidke
 
-* Real-world ML deployment challenges
-* Importance of data preprocessing
-* Handling imbalanced datasets (neutral class issue)
-* Difference between training vs inference in production
+Ex-TCS | Ex-Amazon
+Aspiring Data Scientist
+⭐ Support
 
----
-
-## 🔮 Future Improvements
-
-* Use pre-trained models instead of training in app
-* Improve neutral sentiment detection
-* Add confidence score for predictions
-* Deploy using optimized ML pipeline
-* Enhance UI/UX
-
----
-
-## 🙋‍♀️ Author
-
-**Vaishnavi Tidke**
-
-* Ex-TCS | Ex-Amazon
-* Aspiring Data Scientist
-
----
-
-## ⭐ If you like this project
-
-Give it a ⭐ on GitHub and share your feedback!
-
----
+If you like this project, consider giving it a ⭐ on GitHub!
