@@ -12,7 +12,9 @@ st.title("💬 Sentiment Analysis App (Amazon Reviews)")
 st.write("Analyze customer reviews using Machine Learning")
 st.caption("⚡ GenAI-inspired features (No external API used)")
 
-# ✅ Cache function
+# =========================
+# LOAD & TRAIN MODEL
+# =========================
 @st.cache_resource
 def load_model():
 
@@ -90,15 +92,21 @@ vectorizer, model_lr, model_nb, acc_lr, acc_nb = load_model()
 if vectorizer is None:
     st.stop()
 
-# Accuracy
+# =========================
+# SHOW ACCURACY
+# =========================
 st.subheader("📊 Model Accuracy")
 st.write(f"👉 Logistic Regression: {acc_lr:.2f}")
 st.write(f"👉 Naive Bayes: {acc_nb:.2f}")
 
-# Input
+# =========================
+# USER INPUT
+# =========================
 user_input = st.text_area("✍️ Enter your review here:")
 
-# 🔍 Prediction
+# =========================
+# ANALYZE BUTTON
+# =========================
 if st.button("🔍 Analyze Sentiment"):
 
     if user_input.strip() == "":
@@ -107,76 +115,87 @@ if st.button("🔍 Analyze Sentiment"):
         user_input = user_input.lower()
         input_data = vectorizer.transform([user_input])
 
-        # Predictions
         pred1 = model_lr.predict(input_data)[0]
-        pred2 = model_nb.predict(input_data)[0]
-
-        # Confidence-based neutral
         probs = model_lr.predict_proba(input_data)[0]
         confidence = max(probs)
 
+        # Confidence-based neutral
         if confidence < 0.6:
             final_pred = "neutral"
         else:
             final_pred = pred1
 
-        # Display
-        st.subheader("📊 Prediction Results")
-        st.write("👉 Logistic Regression:", pred1)
-        st.write("👉 Naive Bayes:", pred2)
-        st.write(f"🔥 Confidence: {confidence:.2f}")
+        # ✅ STORE RESULTS
+        st.session_state["text"] = user_input
+        st.session_state["prediction"] = final_pred
+        st.session_state["confidence"] = confidence
 
-        if final_pred == "positive":
-            st.success("😊 Positive Review")
-        elif final_pred == "negative":
-            st.error("😠 Negative Review")
-        else:
-            st.info("😐 Neutral Review")
+# =========================
+# SHOW RESULTS (PERSISTENT)
+# =========================
+if "prediction" in st.session_state:
 
-        # =========================
-        # 🤖 GenAI-like Features
-        # =========================
+    st.subheader("📊 Prediction Results")
+    st.write(f"🔥 Confidence: {st.session_state['confidence']:.2f}")
 
-        st.subheader("🤖 AI Features")
+    if st.session_state["prediction"] == "positive":
+        st.success("😊 Positive Review")
+    elif st.session_state["prediction"] == "negative":
+        st.error("😠 Negative Review")
+    else:
+        st.info("😐 Neutral Review")
 
-        def explain_sentiment(text, prediction):
-            positive_words = ["good", "great", "excellent", "amazing", "love"]
-            negative_words = ["bad", "poor", "worst", "late", "slow"]
+# =========================
+# 🤖 GENAI FEATURES
+# =========================
+def explain_sentiment(text, prediction):
+    positive_words = ["good", "great", "excellent", "amazing", "love"]
+    negative_words = ["bad", "poor", "worst", "late", "slow"]
 
-            pos = sum(word in text for word in positive_words)
-            neg = sum(word in text for word in negative_words)
+    pos = sum(word in text for word in positive_words)
+    neg = sum(word in text for word in negative_words)
 
-            if prediction == "positive":
-                return f"This review is positive due to {pos} positive indicators."
-            elif prediction == "negative":
-                return f"This review is negative due to {neg} negative indicators."
-            else:
-                return "This review has mixed or neutral sentiment."
+    if prediction == "positive":
+        return f"This review is positive due to {pos} positive indicators."
+    elif prediction == "negative":
+        return f"This review is negative due to {neg} negative indicators."
+    else:
+        return "This review has mixed or neutral sentiment."
 
-        def improve_review(text):
-            text = text.strip().capitalize()
-            return f"{text}. The experience can be described more clearly with additional details."
+def improve_review(text):
+    text = text.strip().capitalize()
+    return f"{text}. The experience can be described more clearly with additional details."
 
-        def summarize_review(text):
-            words = text.split()
-            return " ".join(words[:10]) + "..." if len(words) > 10 else text
+def summarize_review(text):
+    words = text.split()
+    return " ".join(words[:10]) + "..." if len(words) > 10 else text
 
-        def generate_reply(prediction):
-            if prediction == "positive":
-                return "Thank you for your positive feedback! We're glad you had a great experience."
-            elif prediction == "negative":
-                return "We’re sorry for your experience. We will work on improving our service."
-            else:
-                return "Thank you for your feedback. We appreciate your suggestions."
+def generate_reply(prediction):
+    if prediction == "positive":
+        return "Thank you for your positive feedback! We're glad you had a great experience."
+    elif prediction == "negative":
+        return "We’re sorry for your experience. We will work on improving our service."
+    else:
+        return "Thank you for your feedback. We appreciate your suggestions."
 
-        if st.button("🧠 Explain Sentiment"):
-            st.write(explain_sentiment(user_input, final_pred))
+# =========================
+# AI BUTTONS (WORKING)
+# =========================
+if "prediction" in st.session_state:
 
-        if st.button("✨ Improve Review"):
-            st.write(improve_review(user_input))
+    text = st.session_state["text"]
+    pred = st.session_state["prediction"]
 
-        if st.button("📄 Summarize Review"):
-            st.write(summarize_review(user_input))
+    st.subheader("🤖 AI Features")
 
-        if st.button("💌 Generate Reply"):
-            st.write(generate_reply(final_pred))
+    if st.button("🧠 Explain Sentiment"):
+        st.write(explain_sentiment(text, pred))
+
+    if st.button("✨ Improve Review"):
+        st.write(improve_review(text))
+
+    if st.button("📄 Summarize Review"):
+        st.write(summarize_review(text))
+
+    if st.button("💌 Generate Reply"):
+        st.write(generate_reply(pred))
