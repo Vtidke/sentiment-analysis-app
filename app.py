@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import glob
+import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -14,35 +14,45 @@ st.write("Analyze customer reviews using Machine Learning")
 # ✅ Cache function
 @st.cache_resource
 def load_model():
-    
-    # Load split CSV files
-    files = glob.glob("data/csv_parts/*.csv")
 
+    folder_path = "data/csv_parts"
     df_list = []
-    for file in files:
-        try:
-            df_temp = pd.read_csv(file)
-            if not df_temp.empty:
-                df_list.append(df_temp)
-        except:
-            continue  # skip bad/empty files
 
-    # Safety check
+    # Check if folder exists
+    if not os.path.exists(folder_path):
+        st.error("❌ Folder 'data/csv_parts' not found!")
+        return None, None, None, 0, 0
+
+    # Read CSV files safely
+    for file in os.listdir(folder_path):
+        if file.endswith(".csv"):
+            file_path = os.path.join(folder_path, file)
+            try:
+                df_temp = pd.read_csv(file_path)
+                if not df_temp.empty:
+                    df_list.append(df_temp)
+            except Exception as e:
+                continue  # skip bad files
+
+    # If no valid data
     if len(df_list) == 0:
         st.error("❌ No valid CSV files found!")
         return None, None, None, 0, 0
 
     df = pd.concat(df_list, ignore_index=True)
 
-    # Take sample for speed
-    df = df.sample(10000, random_state=42)
+    # Ensure required columns exist
+    if 'Text' not in df.columns or 'Score' not in df.columns:
+        st.error("❌ CSV must contain 'Text' and 'Score' columns!")
+        return None, None, None, 0, 0
 
-    # Keep only required columns
-    df = df[['Text', 'Score']]
-    df = df.dropna()
+    # Take sample safely
+    if len(df) > 10000:
+        df = df.sample(10000, random_state=42)
 
-    # Lowercase
-    df['Text'] = df['Text'].str.lower()
+    # Clean data
+    df = df[['Text', 'Score']].dropna()
+    df['Text'] = df['Text'].astype(str).str.lower()
 
     # Sentiment mapping
     def get_sentiment(score):
@@ -64,7 +74,7 @@ def load_model():
     vectorizer = TfidfVectorizer(
         stop_words='english',
         max_features=5000,
-        ngram_range=(1,2)
+        ngram_range=(1, 2)
     )
 
     X_train_vec = vectorizer.fit_transform(X_train)
@@ -87,6 +97,10 @@ def load_model():
 
 # Load model
 vectorizer, model_lr, model_nb, acc_lr, acc_nb = load_model()
+
+# Stop app if model failed
+if vectorizer is None:
+    st.stop()
 
 # Show accuracy
 st.subheader("📊 Model Accuracy")
