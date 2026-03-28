@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
+import glob
 
 # App Title
 st.title("💬 Sentiment Analysis App (Amazon Reviews)")
@@ -14,7 +15,16 @@ st.write("Analyze customer reviews using Machine Learning")
 @st.cache_resource
 def load_model():
     # Load CSV
-    df = pd.read_csv("Reviews.csv", nrows=10000)
+   files = glob.glob("data/csv_parts/*.csv")
+
+df_list = []
+for file in files:
+    df_list.append(pd.read_csv(file))
+
+df = pd.concat(df_list, ignore_index=True)
+
+# Take sample for speed
+df = df.sample(10000, random_state=42)
 
     # Keep only relevant columns and clean
     df = df[['Text', 'Score']]
