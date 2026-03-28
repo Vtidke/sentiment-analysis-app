@@ -1,37 +1,40 @@
 import streamlit as st
 import pandas as pd
+import glob
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
-import glob
 
 # App Title
 st.title("💬 Sentiment Analysis App (Amazon Reviews)")
 st.write("Analyze customer reviews using Machine Learning")
 
-# ✅ Cache function FIRST
+# ✅ Cache function
 @st.cache_resource
 def load_model():
-    # Load CSV
-   files = glob.glob("data/csv_parts/*.csv")
+    
+    # Load split CSV files
+    files = glob.glob("data/csv_parts/*.csv")
 
-df_list = []
-for file in files:
-    df_list.append(pd.read_csv(file))
+    df_list = []
+    for file in files:
+        df_list.append(pd.read_csv(file))
 
-df = pd.concat(df_list, ignore_index=True)
+    df = pd.concat(df_list, ignore_index=True)
 
-# Take sample for speed
-df = df.sample(10000, random_state=42)
+    # Take sample for speed
+    df = df.sample(10000, random_state=42)
 
-    # Keep only relevant columns and clean
+    # Keep only required columns
     df = df[['Text', 'Score']]
     df = df.dropna()
+
+    # Lowercase
     df['Text'] = df['Text'].str.lower()
 
-    # Map score to sentiment
+    # Sentiment mapping
     def get_sentiment(score):
         if score >= 4:
             return "positive"
@@ -42,12 +45,9 @@ df = df.sample(10000, random_state=42)
 
     df['sentiment'] = df['Score'].apply(get_sentiment)
 
-    # Take sample for speed
-    df_sample = df.sample(10000, random_state=42)
-
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(
-        df_sample['Text'], df_sample['sentiment'], test_size=0.2, random_state=42
+        df['Text'], df['sentiment'], test_size=0.2, random_state=42
     )
 
     # Vectorizer
@@ -59,7 +59,7 @@ df = df.sample(10000, random_state=42)
     model_lr = LogisticRegression(max_iter=200)
     model_nb = MultinomialNB()
 
-    # Train models
+    # Train
     model_lr.fit(X_train_vec, y_train)
     model_nb.fit(X_train_vec, y_train)
 
@@ -69,7 +69,8 @@ df = df.sample(10000, random_state=42)
 
     return vectorizer, model_lr, model_nb, acc_lr, acc_nb
 
-# ✅ Call AFTER function
+
+# Load model
 vectorizer, model_lr, model_nb, acc_lr, acc_nb = load_model()
 
 # Show accuracy
@@ -77,10 +78,10 @@ st.subheader("📊 Model Accuracy")
 st.write(f"👉 Logistic Regression: {acc_lr:.2f}")
 st.write(f"👉 Naive Bayes: {acc_nb:.2f}")
 
-# User Input
+# Input
 user_input = st.text_area("✍️ Enter your review here:")
 
-# Button
+# Prediction
 if st.button("🔍 Analyze Sentiment"):
     if user_input.strip() == "":
         st.warning("⚠️ Please enter some text")
@@ -95,7 +96,6 @@ if st.button("🔍 Analyze Sentiment"):
         st.write("👉 Logistic Regression:", pred1)
         st.write("👉 Naive Bayes:", pred2)
 
-        # Final Output
         if pred1 == "positive":
             st.success("😊 Positive Review")
         elif pred1 == "negative":
