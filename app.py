@@ -20,7 +20,17 @@ def load_model():
 
     df_list = []
     for file in files:
-        df_list.append(pd.read_csv(file))
+        try:
+            df_temp = pd.read_csv(file)
+            if not df_temp.empty:
+                df_list.append(df_temp)
+        except:
+            continue  # skip bad/empty files
+
+    # Safety check
+    if len(df_list) == 0:
+        st.error("❌ No valid CSV files found!")
+        return None, None, None, 0, 0
 
     df = pd.concat(df_list, ignore_index=True)
 
@@ -51,7 +61,12 @@ def load_model():
     )
 
     # Vectorizer
-    vectorizer = TfidfVectorizer(stop_words='english', max_features=5000, ngram_range=(1,2))
+    vectorizer = TfidfVectorizer(
+        stop_words='english',
+        max_features=5000,
+        ngram_range=(1,2)
+    )
+
     X_train_vec = vectorizer.fit_transform(X_train)
     X_test_vec = vectorizer.transform(X_test)
 
